@@ -1,3 +1,5 @@
+![game-play.png](assets/images/game-play.png)
+
 # Overview
 *Adventure* is an old-school text-driven adventure game with a level-creation kit. It was written in the summer of 2020 as a pedagogical exercise to teach my children to code Python. It is designed to teach the basics of Python with lightweight classes (object-oriented programming). Despite being text-driven, it does render a graphical view of the current room and player inventory and stats using the Turtle module. The game currently includes some example levels for illustration purposes.
 
@@ -5,7 +7,7 @@ The game is written in Python and should work with version 3.6 or higher
 
 # Quick Start
 - Make sure you have the Python interpreter installed on your system. See [here](https://www.python.org/downloads/)
-- Make sure to have Git installed on your system (on Linux and Mac these will be included). For windows
+- Make sure to have Git installed on your system (on Linux and Mac these will be included). For windows see [here](https://git-scm.com/download/win)
 - In a shell (e.g. Git-bash on Windows), clone this repository into a folder `git clone https://github.com/sebastian-ahmed/adventure_game.git`
 - Run the game either directly `game.py` or depending on your system you may need to do `python game.py` or `python3 game.py`
 - The game should start and you can enter your name and choose a level
