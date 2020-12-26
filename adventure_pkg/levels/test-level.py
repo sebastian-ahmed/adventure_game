@@ -18,19 +18,20 @@ level.locAdd(loc3)
 
 # Create game obstruction objects
 snake = Obstructor(
-    'snake',
-    'dead',
-    '',
-    'grenade',
+    baseName='snake',
+    resolvedStateStr='dead',
+    unresolvedStateStr='',
+    resolutionItem='grenade',
     canKill=True
 )
 snake.setItem('dagger')
 
+# Non-blocking (since resolutionItem=None)
 fire = Obstructor(
-    'fire',
-    '',
-    '',
-    None,
+    baseName='fire',
+    resolvedStateStr='',
+    unresolvedStateStr='',
+    resolutionItem=None,
     canKill=True
 )
 

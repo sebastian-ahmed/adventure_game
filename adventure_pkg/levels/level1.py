@@ -26,24 +26,27 @@ level.locAdd(loc4)
 
 # Create game obstruction objects
 red_door = Obstructor(
-    'red-door',
-    'unlocked',
-    'locked',
-    'red-key'
+    baseName='red-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='red-key',
+    canKill=False
 )
 
 blue_door = Obstructor(
-    'blue-door',
-    'unlocked',
-    'locked',
-    'blue-key'
+    baseName='blue-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='blue-key',
+    canKill=False
 )
 
 ghost = Obstructor(
-    'ghost',
-    'dead',
-    '',
-    'spell'
+    baseName='ghost',
+    resolvedStateStr='dead',
+    unresolvedStateStr='',
+    resolutionItem='spell',
+    canKill=False
 )
 
 # Populate rooms with items

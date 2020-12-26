@@ -39,37 +39,37 @@ level.locAdd(room8)
 
 # Create game obstruction objects
 yellow_door = Obstructor(
-    'yellow-door',
-    'unlocked',
-    'locked',
-    'yellow-key'
+    baseName='yellow-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='yellow-key'
 )
 
 red_door = Obstructor(
-    'red-door',
-    'unlocked',
-    'locked',
-    'red-key'
+    baseName='red-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='red-key'
 )
 
 purple_door = Obstructor(
-    'purple-door',
-    'unlocked',
-    'locked',
-    'purple-key'
+    baseName='purple-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='purple-key'
 )
 white_door = Obstructor(
-    'white-door',
-    'unlocked',
-    'locked',
-    'white-key'
+    baseName='white-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='white-key'
 )
 
 giant_spider = Obstructor(
-    'giant-spider',
-    'dead',
-    '',
-    'sword',
+    baseName='giant-spider',
+    resolvedStateStr='dead',
+    unresolvedStateStr='',
+    resolutionItem='sword',
     canKill=True
 )
 

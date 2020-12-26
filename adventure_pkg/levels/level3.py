@@ -77,57 +77,61 @@ level.locAdd(room50)
 
 # Create game obstruction objects
 black_door = Obstructor(
-    'black-door',
-    'unlocked',
-    'locked',
-    'black-key'
+    baseName='black-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='black-key',
+    canKill=False
 )
 
 red_door = Obstructor(
-    'red-door',
-    'unlocked',
-    'locked',
-    'red-key'
+    baseName='red-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='red-key',
+    canKill=False
 )
 
 blue_door = Obstructor(
-    'blue-door',
-    'unlocked',
-    'locked',
-    'blue-key'
+    baseName='blue-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='blue-key',
+    canKill=False
 )
 
 wolf = Obstructor(
-    'wolf',
-    'sleeping',
-    '',
-    'meat',
+    baseName='wolf',
+    resolvedStateStr='sleeping',
+    unresolvedStateStr='',
+    resolutionItem='meat',
     canKill=True
 )
 # This obstructor will drop an item
 wolf.setItem('poison')
 
 rat = Obstructor(
-    'rat',
-    'dead',
-    '',
-    'poison',
+    baseName='rat',
+    resolvedStateStr='dead',
+    unresolvedStateStr='',
+    resolutionItem='poison',
     canKill=True
 )
 
 wizard = Obstructor(
-    'wizard',
-    'frozen',
-    '',
-    'potion',
+    baseName='wizard',
+    resolvedStateStr='frozen',
+    unresolvedStateStr='',
+    resolutionItem='potion',
     canKill=True
 )
 
 stone_wall = Obstructor(
-    'stone-wall',
-    'destroyed',
-    '',
-    'dynamite'
+    baseName='stone-wall',
+    resolvedStateStr='destroyed',
+    unresolvedStateStr='',
+    resolutionItem='dynamite',
+    canKill=False
 )
 
 # Populate rooms with items

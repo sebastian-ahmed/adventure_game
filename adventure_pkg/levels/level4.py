@@ -78,66 +78,70 @@ level.locAdd(room50)
 
 # Create game obstruction objects
 black_door = Obstructor(
-    'black-door',
-    'unlocked',
-    'locked',
-    'black-key'
+    baseName='black-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='black-key',
+    canKill=False
 )
 
 red_door = Obstructor(
-    'red-door',
-    'unlocked',
-    'locked',
-    'red-key'
+    baseName='red-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='red-key',
+    canKill=False
 )
 
 blue_door = Obstructor(
-    'blue-door',
-    'unlocked',
-    'locked',
-    'blue-key'
+    baseName='blue-door',
+    resolvedStateStr='unlocked',
+    unresolvedStateStr='locked',
+    resolutionItem='blue-key',
+    canKill=False
 )
 
 wolf = Obstructor(
-    'wolf',
-    'sleeping',
-    '',
-    'meat',
+    baseName='wolf',
+    resolvedStateStr='sleeping',
+    unresolvedStateStr='',
+    resolutionItem='meat',
     canKill=True
 )
 # This obstructor will drop an item
 wolf.setItem('poison')
 
 rat = Obstructor(
-    'rat',
-    'dead',
-    '',
-    'poison',
+    baseName='rat',
+    resolvedStateStr='dead',
+    unresolvedStateStr='',
+    resolutionItem='poison',
     canKill=True
 )
 
 wizard = Obstructor(
-    'wizard',
-    'frozen',
-    '',
-    'potion',
+    baseName='wizard',
+    resolvedStateStr='frozen',
+    unresolvedStateStr='',
+    resolutionItem='potion',
     canKill=True
 )
 
 stone_wall = Obstructor(
-    'stone-wall',
-    'destroyed',
-    '',
-    'dynamite'
+    baseName='stone-wall',
+    resolvedStateStr='destroyed',
+    unresolvedStateStr='',
+    resolutionItem='dynamite',
+    canKill=False
 )
 
 # This is a non-blocking obstructor
 # and will damage the player, note
 # we set resolutionItem=None
 fire = Obstructor(
-    'flaming-pathway',
-    '',
-    '',
+    baseName='flaming-pathway',
+    resolvedStateStr='',
+    unresolvedStateStr='',
     resolutionItem=None,
     canKill=True
 )
@@ -158,10 +162,7 @@ room21.addGameItem('healthpack')
 room21.addGameItem('healthpack')
 room33.addGameItem('healthpack')
 
-# Connect locations and obstructors. Note that some of the connections
-# are non-reciprocating, e.g. a forward connector of one location may
-# connect to the right connector of another location. In these cases
-# a second direction (for the second location) is also specified
+# Connect locations and obstructors. All here assumed to be reciprocating connectors
 Location.connect(room00,'forward' ,room01)
 Location.connect(room00,'right'   ,room10,obs=fire)
 Location.connect(room10,'forward' ,room11,obs=red_door)
