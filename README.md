@@ -69,20 +69,45 @@ The general structure of a level file is shown below:
     - The game-engine *automatically makes reciprocating connections*, so only one side of each connection needs to be specified (see 'level3' for an examnple of non-reciprocating connections)
     - Attach Obstructor objects to the appropriate connectors (e.g. `obs=wolf`)
 1. Set the start location in the Level object
+1. Add a play-script for automated testing by assigning `level.testScript` to an action-command list (see section on level-testing for more details)
 
 Messing up connections is the typical bug which can happen during level construction so care must be taken during this step.
 
-## Automated Level Debug
-As of now, the main tool for debugging levels (besides playing them) is to use the `level_analyzer.py` script. This script has a similar interface to `game.py` in that it asks the user for a registered level to be analyzed.
+# Automated Testing
+*Adventure* provides infrastructure for automated level-test via a user-input logging and script-replay capability. In addition to this, a level-analyzer script is provided for checking the integrity of the level connectivity graph.
+
+## Static Level Connectivity Analysis
+Static analysis of level connectivity graphs is provided by the `level_analyzer.py` script. This script has a similar interface to `game.py` in that it asks the user for a registered level to be analyzed.
 The Location graph actually forms a *quad-linked-list* data structure. The analysis script will recursively analyze the graph and report the number of locations it found and compare this with the Level object in the level file amongst other things. The output of the analyzer is a bit rudimentary but it works for catching most issues
 
-A future update will feature a player-emulator to allow playing of a full level to be scripted and checked.
+Note: the graph tracing feature is also available as a hidden command in-game, via the `trace` command.
+
+## Playthrough Action Logging
+*Adventure* provides logging capability by capturing all *valid* action commands during play. The commands are dumped as a JSON list with file-name `input-log.json`. The player can dump the current action history via the `dump` command, otherwise when a game exits (for any reason), a context-manager writes the history to this file. This file can be used for scripted replay.
+
+## Scripted Playthrough Regression Testing
+Each level requires a playthrough script for automated testing. The playthrough script is a simple list of string action commands.
+
+The easiest way to generate a script is to simply play the level, finish (without dying) copy the automatically generated action command dump in the `input-log.json` and add this to the level file via the `level.testScript` property (see any of the levels for examples)
+
+The regression test script is `test.py`. If running on Windows, make sure to run it as `python test.py` so that the output of the script does not call a Python shell (which will disappear). This script will process all registered levels (via `levels.json`), check each level objects's `testScript` property and proceed to execute the script on an instance of the game, printing a summary at the end
+
+```
+Test Results Summary:
+=====================
+Level: level1 : Pass=True
+Level: level2 : Pass=True
+Level: level3 : Pass=True
+Level: level4 : Pass=True
+Level: test-level : Pass=True
+```
+
+- The script replay mode disables the GUI (for speed)
+- If a player dies as a result of a script playthrough, the test is reported as a fail.
+- If the script fails to provides a sequence of actions to complete the level, a `StopIteration` exception is raised by the script sequence object. This is by design.
 
 # Feature and Task Backlog
-- ~~Add a player-emulation mode to enable a programmatical level test (i.e. capture player actions in a script and have the game execute the script vs key-strokes)~~ done 12/27/2020
-    - Also added an action command logging feature to be used to generate play scripts
-- Add automated unit tests (both for classes and levels). Level unit-tests should be mandatory as part of level design (essentially the walkthrough as a scripted description)
-    - Level-based automatic testing completed 12/27/2020
+- Add automated unit tests for game classes
 - Add more source-level documentation
 - De-couple concept of blocking and resolvable obstructions. For example, allow a "fire" which you can pass through with damage to be put out with "water"
 - Add a level chaining feature, i.e., instead of ending at the “exit room”, load a next-level (if specified). This could be used to implement multiple floors (upstairs, downstairs etc)
