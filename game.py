@@ -11,7 +11,7 @@ from adventure_pkg.modules.GUIWindow   import GUIWindow
 from adventure_pkg.modules.Player      import Player
 from adventure_pkg.modules.ActionState import ActionState
 from adventure_pkg.modules             import Utils as utils
-
+from adventure_pkg.modules.TestClasses import GameConfig,PlayScript
 
 gameVersion = '1.0'
 
@@ -29,8 +29,9 @@ def splashScreen():
 def welcomeMsg(player):
     print(f"\nWelcome to the game {player._name}!\n")
 
-def waitEnter():
-    input("Press ENTER to continue")
+def waitEnter(skip:bool=False):
+    if not skip:
+        input("Press ENTER to continue")
 
 def helpMsg():
     print("\nThe text-driven command-line interface of Adventure can take variation in user input")
@@ -83,18 +84,26 @@ def procUserInput (inString):
     return 'invalid',[]
 
 
+def getInput(inputStr:str='',scripted:bool=True,scriptObj:PlayScript=None)->str:
+    if scripted:
+        print(inputStr)
+        return next(scriptObj)
+    else:
+        return input(inputStr)
+
 ###############################################################################
 # Main game code
 ###############################################################################
 
-def main():
-    clearScreen(0)
-    splashScreen()
-    iname = input("Please enter your name:")
+def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
+    if not scriptedMode:
+        clearScreen(0)
+        splashScreen()
+    iname = getInput("Please enter your name:",scriptedMode,scriptObj)
     # Create a player object
     player = Player(iname)
     welcomeMsg(player)
-
+ 
     # Create game-state object
     state = ActionState()
 
@@ -103,16 +112,21 @@ def main():
 
     # Select level
     levelsDict = utils.readLevelJSON()
-    full_level_name = "adventure_pkg.levels." + utils.getLevelFromUser(levelsDict) 
+    full_level_name = "adventure_pkg.levels."
+    if scriptedMode:
+        full_level_name += configObj.levelName
+    else:
+        full_level_name += utils.getLevelFromUser(levelsDict) 
     level = importlib.import_module(full_level_name)
 
     # Give option to turn off damage model
-    userInputStr = input("\nDisable in-game damage to player (y/n)? (default=no):")
+    userInputStr = getInput("\nDisable in-game damage to player (y/n)? (default=no):",scriptedMode,scriptObj)
     if userInputStr in ['y','Y','yes','Yes','YES']:
         state.setFlag('disableDamage')
 
-    # Instantiate a GUIWindow object
-    gui = GUIWindow(f"Adventure {gameVersion}")
+    if guiEnable:
+        # Instantiate a GUIWindow object
+        gui = GUIWindow(f"Adventure {gameVersion}")
 
     # Initialize
     state.setFlag('moved')
@@ -123,7 +137,8 @@ def main():
         if state.getFlag('checkHealth'):
             if player.isDead() :
                 print(f"Too much damage, {player._name} is dead! Game Over")
-                gui.playerDeadWindow(player)
+                if guiEnable:
+                    gui.playerDeadWindow(player)
                 break
             else:
                 player.printHealth()
@@ -131,20 +146,22 @@ def main():
         if state.getFlag('moved'):
             redrawFlag == True
             if state.getFlag('waitForEnter'):
-                waitEnter()
-            clearScreen(1)
+                waitEnter(scriptedMode)
+            if not scriptedMode:
+                clearScreen(1)
             state.clearFlags(['moved','checkHealth','waitForEnter'])
             curloc.printDescription()
             if curloc.isEndLocation():
                 print(f"Congratulations {player._name}, you have escaped! Game Over")
-                gui.gameOverWindow(player)
+                if guiEnable:
+                    gui.gameOverWindow(player)
                 break
             else:
                 curloc.printDirections()
-        if redrawFlag:
+        if redrawFlag and guiEnable:
             gui.updateWindow(curloc,player)
             redrawFlag==False
-        userInputStr = input(f"Enter action {player._name}:")
+        userInputStr = getInput(f"Enter action {player._name}:",scriptedMode,scriptObj)
         # We use regular expressions to deal with some variability in user input
         command, args = procUserInput(userInputStr)
         if command == 'quit':
@@ -196,7 +213,10 @@ def main():
             print("I did not understand the action, type 'help' for list of commands")
             pass
 
-    waitEnter()
+    if scriptedMode:
+        return not player.isDead()
+    else:
+        waitEnter()
 
 if __name__ == '__main__':
     main()

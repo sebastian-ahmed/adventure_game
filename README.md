@@ -18,7 +18,7 @@ The game is written in Python and should work with version 3.6 or higher
 1. Code the level based on your design
 
 ## Level Constructs
-In this version of Adventure, there are only four mahojor types of things involved in designing a level
+In this version of Adventure, there are only four major types of things involved in designing a level
 1. Locations : these are essentially the "rooms" of the game. Locations are 2-dimensional spaces which have up to four(4) connectors to other locations
 1. Connectors : These are the objects which connect Locations
 1. Obstructions : These are generic obstacles that can be associated with Connectors. Obstructions can:

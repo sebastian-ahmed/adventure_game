@@ -36,7 +36,7 @@ fire = Obstructor(
 )
 
 # Populate rooms with items
-loc1.addItem("grenade")
+loc2.addItem("grenade")
 loc1.addGameItem("healthpack")
 loc1.addGameItem("healthpack")
 loc1.addGameItem("healthpack")
@@ -47,3 +47,11 @@ Location.connect(loc1,'right',loc3,obs=snake)
 
 # Assign start location handle
 level.start_loc=loc1
+
+# Define a play-through test-script
+level.testScript=[
+    'go l',
+    'take grenade',
+    'go r',
+    'use grenade snake',
+    'go r']
