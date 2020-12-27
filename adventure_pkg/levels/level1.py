@@ -62,3 +62,20 @@ Location.connect(loc3,'forward',loc4,obs=ghost)
 
 # Assign start location handle
 level.start_loc=loc0
+
+# Define a play-through test-script
+level.testScript=[
+    "go l",
+    "take red-key",
+    "go r",
+    "use red-key on red-door",
+    "go r",
+    "take blue-key",
+    "go l",
+    "go l",
+    "use blue-key blue-door",
+    "go l",
+    "take spell",
+    "use spell on ghost",
+    "go f"
+]

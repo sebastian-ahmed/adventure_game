@@ -92,3 +92,27 @@ Location.connect(room5,"right", room8, obs=giant_spider)
 # Assign start location handle
 level.start_loc=room1
 
+# Define a play-through test-script
+level.testScript=[
+    "go l",
+    "take purple-key",
+    "use purple-key on purple-door",
+    "go f",
+    "take yellow-key",
+    "go b",
+    "go r",
+    "use yellow-key on yellow-door",
+    "go r",
+    "take white-key",
+    "go f",
+    "use white-key on white-door",
+    "go f",
+    "take red-key",
+    "go b",
+    "use red-key on red-door",
+    "go l",
+    "take sword",
+    "go r",
+    "use sword on giant-spider",
+    "go r"
+]
