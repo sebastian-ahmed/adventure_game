@@ -10,11 +10,11 @@ def main():
         print(f"Loading level:{level}")
         full_level_name = "adventure_pkg.levels." + level 
         levelObject = importlib.import_module(full_level_name).level
-        results[levelObject.name]=False
+        results[levelObject.name]='No script found'
         if levelObject.testScript:
             config = GameConfig(levelName=level,disableDamage=False)
             scriptObj=PlayScript(levelObject.testScript,config)
-            print(scriptObj._script)
+            #print(scriptObj._script)
             flag = game.main(guiEnable=False,scriptedMode=True,scriptObj=scriptObj,configObj=config)
             print(f"Test result = {flag}")
             results[levelObject.name]=flag
@@ -22,7 +22,7 @@ def main():
     print("Test Results Summary:")
     print("=====================")
     for level,result in results.items():
-        print(f"Level: {level} = {result}")
+        print(f"Level: {level} : Pass={result}")
 
 if __name__ == '__main__':
     main()
