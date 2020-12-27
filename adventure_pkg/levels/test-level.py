@@ -50,8 +50,15 @@ level.start_loc=loc1
 
 # Define a play-through test-script
 level.testScript=[
-    'go l',
-    'take grenade',
-    'go r',
-    'use grenade snake',
-    'go r']
+    "take healthpack",
+    "take healthpack",
+    "take healthpack",
+    "go l",
+    "use healthpack",
+    "take grenade",
+    "go r",
+    "use healthpack",
+    "go r",
+    "use grenade on snake",
+    "go r"
+]
