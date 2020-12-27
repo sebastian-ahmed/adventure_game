@@ -60,7 +60,29 @@ def clearScreen(delay):
     else:
         os.system('clear')
 
-def procUserInput (inString):
+class InputManager(object):
+    '''
+    Provides a context-managed management layer for user input:
+    - Selecting input from the terminal or from replay-script object
+    - Processing user input (with regular expression matching) against supported commands
+    - Logging of action commands
+    - Dumping of action commands to JSON file (for level testing in scripted mode)
+      - Dumping can be called by the user otherwise happens when this object goes out of scope
+    '''
+
+    def __init__(self,scripted:bool=False,script:PlayScript=None):
+        self._scripted = scripted
+        self._script   = script
+        self._log      = [] # input log
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self,*args):
+        '''
+        Attempt to dump action history upon exiting scope
+        '''
+        self.dump()
 
     matchDict = {
         'quit':       r'^[qQ]uit$|^[qQ]$|$|^[eE]xit$',
@@ -69,6 +91,7 @@ def procUserInput (inString):
         'hint':       r'^[hH]int$',
         'inv':        r'^[iI]nv(?:entory)*$',
         'trace':      r'^[tT]race$',
+        'dump':       r'^[dD]ump$',
         'use_self':   r'^[uU]se\s+([a-zA-Z0-9\-_]+)$',
         'use_object': r'^[uU]se\s+(?:the\s+)*([a-zA-Z0-9\-_]+)\s+(?:on\s+)*(?:the\s+)*([a-zA-Z0-9\-_]+)',
         'go':         r'^[gG]o\s+(?:to\s+)*([a-zA-Z0-9\-_]+)',
@@ -76,30 +99,44 @@ def procUserInput (inString):
         'drop':       r'^[dD]rop\s+(?:the\s+)*([a-zA-Z0-9\-_]+)'
     }
 
-    for command,exp in matchDict.items():
-        mobj = re.compile(exp)
-        matches = mobj.match(inString)
-        if (matches):
-            return command,list(matches.groups())
-    return 'invalid',[]
+    def procUserInput (self,inString)->list:
+        for command,exp in InputManager.matchDict.items():
+            mobj = re.compile(exp)
+            matches = mobj.match(inString)
+            if (matches):
+                return command,list(matches.groups())
+        return 'invalid',[]
 
+    def getInput(self,inputStr:str,logged:bool=True):
+        if self._scripted:
+            script_input = next(self._script)
+            print(inputStr+script_input)
+            return script_input
+        else:
+            # Support logging for non-scripted mode only
+            user_input = input(inputStr)
+            if logged==True:
+                if self.procUserInput(user_input)[0] in ['dump','exit','invalid']:
+                    pass
+                else:
+                    self._log.append(user_input)
+            return user_input
 
-def getInput(inputStr:str='',scripted:bool=True,scriptObj:PlayScript=None)->str:
-    if scripted:
-        print(inputStr)
-        return next(scriptObj)
-    else:
-        return input(inputStr)
+    def dump(self):
+        log_file = 'input-log.json'
+        print(f"Dumping out player history to {log_file}")
+        with open(log_file,'w') as f:
+            json.dump(self._log,f,indent=4)
 
 ###############################################################################
 # Main game code
 ###############################################################################
 
-def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
+def game_loop(inputManager,guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
     if not scriptedMode:
         clearScreen(0)
         splashScreen()
-    iname = getInput("Please enter your name:",scriptedMode,scriptObj)
+    iname = inputManager.getInput("Please enter your name:",logged=False)
     # Create a player object
     player = Player(iname)
     welcomeMsg(player)
@@ -120,7 +157,7 @@ def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
     level = importlib.import_module(full_level_name)
 
     # Give option to turn off damage model
-    userInputStr = getInput("\nDisable in-game damage to player (y/n)? (default=no):",scriptedMode,scriptObj)
+    userInputStr = inputManager.getInput("\nDisable in-game damage to player (y/n)? (default=no):",logged=False)
     if userInputStr in ['y','Y','yes','Yes','YES']:
         state.setFlag('disableDamage')
 
@@ -161,9 +198,9 @@ def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
         if redrawFlag and guiEnable:
             gui.updateWindow(curloc,player)
             redrawFlag==False
-        userInputStr = getInput(f"Enter action {player._name}:",scriptedMode,scriptObj)
+        userInputStr = inputManager.getInput(f"Enter action {player._name}:")
         # We use regular expressions to deal with some variability in user input
-        command, args = procUserInput(userInputStr)
+        command, args = inputManager.procUserInput(userInputStr)
         if command == 'quit':
             print(f"Exiting ... thanks for playing the game {player._name}")
             break
@@ -209,6 +246,8 @@ def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
             helpMsg()
         elif command == 'trace':
             utils.debugPrintGraph(curloc)
+        elif command == 'dump':
+            inputManager.dump()
         else:
             print("I did not understand the action, type 'help' for list of commands")
             pass
@@ -217,6 +256,12 @@ def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
         return not player.isDead()
     else:
         waitEnter()
+
+def main(guiEnable=True,scriptedMode:bool=False,scriptObj=None,configObj=None):
+
+    # Initialize an InputManager object to handle game inputs
+    with InputManager(scripted=scriptedMode,script=scriptObj) as inputManager:
+        return game_loop(inputManager,guiEnable,scriptedMode,scriptObj,configObj)
 
 if __name__ == '__main__':
     main()

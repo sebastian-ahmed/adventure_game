@@ -79,8 +79,10 @@ The Location graph actually forms a *quad-linked-list* data structure. The analy
 A future update will feature a player-emulator to allow playing of a full level to be scripted and checked.
 
 # Feature and Task Backlog
-- Add a player-emulation mode to enable a programmatical level test (i.e. capture player actions in a script and have the game execute the script vs key-strokes)
+- ~~Add a player-emulation mode to enable a programmatical level test (i.e. capture player actions in a script and have the game execute the script vs key-strokes)~~ done 12/27/2020
+    - Also added an action command logging feature to be used to generate play scripts
 - Add automated unit tests (both for classes and levels). Level unit-tests should be mandatory as part of level design (essentially the walkthrough as a scripted description)
+    - Level-based automatic testing completed 12/27/2020
 - Add more source-level documentation
 - De-couple concept of blocking and resolvable obstructions. For example, allow a "fire" which you can pass through with damage to be put out with "water"
 - Add a level chaining feature, i.e., instead of ending at the “exit room”, load a next-level (if specified). This could be used to implement multiple floors (upstairs, downstairs etc)
