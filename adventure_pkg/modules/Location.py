@@ -40,6 +40,22 @@ class Location():
         # End game location flag
         self._endLocation = endLocation
 
+    @property
+    def name(self)->str:
+        return self._name
+
+    @property
+    def description(self)->str:
+        return self._description
+
+    @property
+    def hint(self)->str:
+        return self._hint
+
+    @property
+    def items(self)->list:
+        return self._items
+
     @staticmethod
     def connect(a,dir_a,b,dir_b=None,obs=None):
         '''
