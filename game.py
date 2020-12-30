@@ -2,13 +2,16 @@
 #!/usr/bin/env python3
 
 import os
+from os import path
 import re
 import time
 import json
 import importlib
+import pickle
 from adventure_pkg.modules.Adventure   import Adventure
 from adventure_pkg.modules.GUIWindow   import GUIWindow
 from adventure_pkg.modules.Player      import Player
+from adventure_pkg.modules.Level       import Level
 from adventure_pkg.modules.ActionState import ActionState
 from adventure_pkg.modules             import Utils as utils
 from adventure_pkg.modules.TestClasses import GameConfig,PlayScript
@@ -50,6 +53,8 @@ def helpMsg():
     print("drop <item> (drop an item in your inventory)")
     print("use <item> (on) <object> (Use an item in player inventory on object such as door or enemy)")
     print("use <item> (Use an item directly such as food)")
+    print("save (saves current game to saved-game)")
+    print("load (loads saved game from saved-game)")
     print("h|help (print this message)")
     print("q|quit|exit (exits the game)\n")
 
@@ -85,7 +90,7 @@ class InputManager(object):
         self.dump()
 
     matchDict = {
-        'quit':       r'^[qQ]uit$|^[qQ]$|$|^[eE]xit$',
+        'quit':       r'^[qQ]uit$|^[qQ]$|^[eE]xit$',
         'help':       r'^[hH]elp$|^[hH]$|$',
         'look':       r'^[lL]ook$',
         'hint':       r'^[hH]int$',
@@ -96,7 +101,9 @@ class InputManager(object):
         'use_object': r'^[uU]se\s+(?:the\s+)*([a-zA-Z0-9\-_]+)\s+(?:on\s+)*(?:the\s+)*([a-zA-Z0-9\-_]+)',
         'go':         r'^[gG]o\s+(?:to\s+)*([a-zA-Z0-9\-_]+)',
         'take':       r'^(?:[tT]ake|[gG]et)\s+(?:the\s+)*([a-zA-Z0-9\-_]+)',
-        'drop':       r'^[dD]rop\s+(?:the\s+)*([a-zA-Z0-9\-_]+)'
+        'drop':       r'^[dD]rop\s+(?:the\s+)*([a-zA-Z0-9\-_]+)',
+        'save':       r'^[sS]ave',
+        'load':       r'^[lL]oad'
     }
 
     def procUserInput (self,inString)->list:
@@ -116,7 +123,7 @@ class InputManager(object):
             # Support logging for non-scripted mode only
             user_input = input(inputStr)
             if logged==True:
-                if self.procUserInput(user_input)[0] in ['dump','exit','invalid']:
+                if self.procUserInput(user_input)[0] in ['dump','exit','save','invalid']:
                     pass
                 else:
                     self._log.append(user_input)
@@ -128,6 +135,46 @@ class InputManager(object):
         with open(log_file,'w') as f:
             json.dump(self._log,f,indent=4)
 
+class GameState(object):
+    '''
+    Wrapper object which wraps the game objects to enable saving and loading of a game
+    '''
+
+    def __init__(self,level:Level,player:Player,state:ActionState):
+        self._levelHandle  = level
+        self._playerHandle = player
+        self._stateHandle  = state
+
+    fname='saved-game'
+
+    @property
+    def level(self)->Level:
+        return self._levelHandle
+
+    @property
+    def player(self)->Player:
+        return self._playerHandle
+
+    @property
+    def state(self)->ActionState:
+        return self._stateHandle
+
+    def save(self):
+        print("Saving game to save-file")
+        with open(GameState.fname,'wb') as f:
+            pickle.dump(self,f)
+
+    @staticmethod
+    def checkSave()->bool:
+        return path.exists(GameState.fname)
+
+    @staticmethod
+    def load():
+        print("Loading game from save-file")
+        with open(GameState.fname,'rb') as f:
+            return pickle.load(f)
+
+
 ###############################################################################
 # Main game code
 ###############################################################################
@@ -136,124 +183,150 @@ def game_loop(inputManager,guiEnable=True,scriptedMode:bool=False,scriptObj=None
     if not scriptedMode:
         clearScreen(0)
         splashScreen()
-    iname = inputManager.getInput("Please enter your name:",logged=False)
-    # Create a player object
-    player = Player(iname)
-    welcomeMsg(player)
- 
-    # Create game-state object
-    state = ActionState()
 
-    # Create an Adventure object and provide Player and State object handles
-    adv = Adventure(player,state)
-
-    # Select level
-    levelsDict = utils.readLevelJSON()
-    full_level_name = "adventure_pkg.levels."
-    if scriptedMode:
-        full_level_name += configObj.levelName
-    else:
-        full_level_name += utils.getLevelFromUser(levelsDict) 
-    level = importlib.import_module(full_level_name)
-
-    # Give option to turn off damage model
-    userInputStr = inputManager.getInput("\nDisable in-game damage to player (y/n)? (default=no):",logged=False)
+    userInputStr = ''
+    if GameState.checkSave():
+        userInputStr = inputManager.getInput("\nA saved game was found, would you like to load it? (default=no):",logged=False)
     if userInputStr in ['y','Y','yes','Yes','YES']:
-        state.setFlag('disableDamage')
+        game = GameState.load()
+        game.state.setFlags(['waitForEnter','moved'])
+    else:
+        iname = inputManager.getInput("Please enter your name:",logged=False)
+        # Create a player object
+        player = Player(iname)
+        welcomeMsg(player)
+    
+        # Create game-state object
+        state = ActionState()
+
+        # Select level
+        levelsDict = utils.readLevelJSON()
+        full_level_name = "adventure_pkg.levels."
+        if scriptedMode:
+            full_level_name += configObj.levelName
+        else:
+            full_level_name += utils.getLevelFromUser(levelsDict) 
+        level = importlib.import_module(full_level_name).level
+
+        # Give option to turn off damage model
+        userInputStr = inputManager.getInput("\nDisable in-game damage to player (y/n)? (default=no):",logged=False)
+        if userInputStr in ['y','Y','yes','Yes','YES']:
+            state.setFlag('disableDamage')
+
+        # Wrap the player objects with wrapping class so we can easily save or load
+        # a save-game
+        game = GameState(level,player,state)
+        game.level.cur_loc = game.level.start_loc
 
     if guiEnable:
         # Instantiate a GUIWindow object
         gui = GUIWindow(f"Adventure {gameVersion}")
 
     # Initialize
-    state.setFlag('moved')
-    curloc = level.level.start_loc
+    game.state.setFlag('moved')
     redrawFlag = True
 
+    # Create an Adventure object and provide Player and State object handles via the
+    # wrapping object
+    adv = Adventure(game.player,game.state)
+
     while True:
-        if state.getFlag('checkHealth'):
-            if player.isDead() :
-                print(f"Too much damage, {player._name} is dead! Game Over")
+        if game.state.getFlag('checkHealth'):
+            if game.player.isDead() :
+                print(f"Too much damage, {game.player._name} is dead! Game Over")
                 if guiEnable:
-                    gui.playerDeadWindow(player)
+                    gui.playerDeadWindow(game.player)
                 break
             else:
-                player.printHealth()
-                state.clearFlags(['checkHealth'])
-        if state.getFlag('moved'):
+                game.player.printHealth()
+                game.state.clearFlags(['checkHealth'])
+        if game.state.getFlag('moved'):
             redrawFlag == True
-            if state.getFlag('waitForEnter'):
+            if game.state.getFlag('waitForEnter'):
                 waitEnter(scriptedMode)
             if not scriptedMode:
                 clearScreen(1)
-            state.clearFlags(['moved','checkHealth','waitForEnter'])
-            curloc.printDescription()
-            if curloc.isEndLocation():
-                print(f"Congratulations {player._name}, you have escaped! Game Over")
+            game.state.clearFlags(['moved','checkHealth','waitForEnter'])
+            game.level.cur_loc.printDescription()
+            if game.level.cur_loc.isEndLocation():
+                print(f"Congratulations {game.player._name}, you have escaped! Game Over")
                 if guiEnable:
-                    gui.gameOverWindow(player)
+                    gui.gameOverWindow(game.player)
                 break
             else:
-                curloc.printDirections()
+                game.level.cur_loc.printDirections()
         if redrawFlag and guiEnable:
-            gui.updateWindow(curloc,player)
+            gui.updateWindow(game.level.cur_loc,game.player)
             redrawFlag==False
-        userInputStr = inputManager.getInput(f"Enter action {player._name}:")
+        userInputStr = inputManager.getInput(f"Enter action {game.player._name}:")
         # We use regular expressions to deal with some variability in user input
         command, args = inputManager.procUserInput(userInputStr)
         if command == 'quit':
-            print(f"Exiting ... thanks for playing the game {player._name}")
+            print(f"Exiting ... thanks for playing the game {game.player._name}")
             break
         if command == 'go':
             if args[0] in ['f','forward','up']:
-                curloc = adv.moveToLocation(curloc,'forward')
+                game.level.cur_loc = adv.moveToLocation(game.level.cur_loc,'forward')
                 continue
             elif args[0] in ['b','back','backward','down']:
-                curloc = adv.moveToLocation(curloc,'backward')
+                game.level.cur_loc = adv.moveToLocation(game.level.cur_loc,'backward')
                 continue
             elif args[0] in ['l','left']:
-                curloc = adv.moveToLocation(curloc,'left')
+                game.level.cur_loc = adv.moveToLocation(game.level.cur_loc,'left')
                 continue
             elif args[0] in ['r','right']:
-                curloc = adv.moveToLocation(curloc,'right')
+                game.level.cur_loc = adv.moveToLocation(game.level.cur_loc,'right')
                 continue
             else:
                 print(f"{args[0]} is not a valid direction to go")
                 continue
         elif command == 'look':
-            curloc.look()
-            curloc.printDirections()
+            game.level.cur_loc.look()
+            game.level.cur_loc.printDirections()
             continue
         elif command == 'hint':
-            curloc.printHint()
+            game.level.cur_loc.printHint()
         elif command == 'take':
-            adv.xferItemToPlayer(curloc,args[0])
+            adv.xferItemToPlayer(game.level.cur_loc,args[0])
             redrawFlag==True
         elif command == 'drop':
-            adv.xferItemToLoc(curloc,args[0])
+            adv.xferItemToLoc(game.level.cur_loc,args[0])
             redrawFlag==True
         elif command == 'use_object':
-            if adv.useItemOnObstructor(curloc,args[0],args[1]):
+            if adv.useItemOnObstructor(game.level.cur_loc,args[0],args[1]):
                 redrawFlag==True
             continue
         elif command == 'use_self':
-            if adv.useItemOnSelf(curloc,args[0]):
+            if adv.useItemOnSelf(game.level.cur_loc,args[0]):
                 redrawFlag==True
             continue
         elif command == 'inv':
-            player.printInv()
+            game.player.printInv()
         elif command == 'help':
             helpMsg()
         elif command == 'trace':
-            utils.debugPrintGraph(curloc)
+            utils.debugPrintGraph(game.level.cur_loc)
         elif command == 'dump':
             inputManager.dump()
+        elif command == 'save':
+            game.save()
+        elif command == 'load':
+            if not GameState.checkSave():
+                print(f"Game save file '{GameState.fname}' found")
+            else:
+                game = GameState.load()
+                game.state.setFlags(['waitForEnter','moved'])
+                # This is a bit of a hack because otherwise adv maintains handles to the 
+                # previous Player and ActionState objects. An improvement needs to to be made
+                # to encapsulate all game state objects in one place
+                adv=Adventure(game.player,game.state)
+            continue
         else:
             print("I did not understand the action, type 'help' for list of commands")
             pass
 
     if scriptedMode:
-        return not player.isDead()
+        return not game.player.isDead()
     else:
         waitEnter()
 
