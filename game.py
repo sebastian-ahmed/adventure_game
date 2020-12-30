@@ -185,7 +185,7 @@ def game_loop(inputManager,guiEnable=True,scriptedMode:bool=False,scriptObj=None
         splashScreen()
 
     userInputStr = ''
-    if GameState.checkSave():
+    if GameState.checkSave() and not scriptedMode:
         userInputStr = inputManager.getInput("\nA saved game was found, would you like to load it? (default=no):",logged=False)
     if userInputStr in ['y','Y','yes','Yes','YES']:
         game = GameState.load()
