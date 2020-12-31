@@ -76,7 +76,7 @@ class Location():
             b._con[Location.getOppConnector(dir_a)]._obsHandle = obs
         else:
             b._con[dir_b]._locHandle = a
-            b._con[dir_b]._obsHandle    = obs
+            b._con[dir_b]._obsHandle = obs
 
     @staticmethod
     def getOppConnector (direction):
@@ -146,7 +146,7 @@ class Location():
 
     def dirIsObstacled(self,direction):
         if self.dirHasObstructor(direction):
-            return self._con[direction]._obsHandle.isObstacle()
+            return self._con[direction]._obsHandle.nonBlocking and not self._con[direction]._obsHandle._resolved
         else:
             return False
 

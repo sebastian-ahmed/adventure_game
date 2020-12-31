@@ -11,19 +11,20 @@ class Obstructor():
         resolvedStateStr,
         unresolvedStateStr,
         resolutionItem=None,
-        canKill=False):
+        canKill=False,
+        nonBlocking:bool=False):
         self._baseName = baseName
         self._resolvedStateStr = resolvedStateStr
         self._unresolvedStateStr = unresolvedStateStr
         self._resolutionItem = resolutionItem
         self._canKill = canKill
+        self._nonBlocking = nonBlocking
         self._resolved = False
-
         self._item = ''
-        if self._resolutionItem == None:
-            self._isObstacle = True
-        else:
-            self._isObstacle = False
+
+    @property
+    def nonBlocking(self)->bool:
+        return self._nonBlocking
 
     def resolve(self):
         self._resolved = True
@@ -58,11 +59,8 @@ class Obstructor():
     def canKill(self):
         return self._canKill
 
-    def isObstacle(self):
-        return self._isObstacle
-
     def useItem(self,item):
-        if self.isResolved() or self._resolutionItem != item or self.isObstacle():
+        if self.isResolved() or self._resolutionItem != item or self._resolutionItem == None:
             print(f"Using {item} on {self._baseName} has no effect")
             return False
         elif self._resolutionItem == item:

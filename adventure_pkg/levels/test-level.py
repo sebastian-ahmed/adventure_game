@@ -26,20 +26,22 @@ snake = Obstructor(
 )
 snake.setItem('dagger')
 
-# Non-blocking (since resolutionItem=None)
+# Non-blocking but can be resolved
 fire = Obstructor(
     baseName='fire',
-    resolvedStateStr='',
-    unresolvedStateStr='',
-    resolutionItem=None,
-    canKill=True
+    resolvedStateStr='extinguished',
+    unresolvedStateStr='burning',
+    resolutionItem='water',
+    canKill=True,
+    nonBlocking=True
 )
 
 # Populate rooms with items
+loc1.addItem("water")
+loc1.addGameItem("healthpack")
+loc1.addGameItem("healthpack")
+loc1.addGameItem("healthpack")
 loc2.addItem("grenade")
-loc1.addGameItem("healthpack")
-loc1.addGameItem("healthpack")
-loc1.addGameItem("healthpack")
 
 # Connect locations
 Location.connect(loc1,'left',loc2,obs=fire)

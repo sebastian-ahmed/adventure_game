@@ -143,7 +143,8 @@ fire = Obstructor(
     resolvedStateStr='',
     unresolvedStateStr='',
     resolutionItem=None,
-    canKill=True
+    canKill=True,
+    nonBlocking=True
 )
 
 # Populate rooms with items

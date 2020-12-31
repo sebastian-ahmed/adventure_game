@@ -63,6 +63,7 @@ The general structure of a level file is shown below:
     - A prefix string for the resolved state (if applicable, e.g. "dead" resultiung in "dead snake"
     - The Item string which resolves Obstructor. `resolutionItem=None` for un-resolvable
     - A boolean flag to determine if this Obstructor can damage the player when the player moves in its direction
+    - An optional boolean flag which can make the obstructor non-blocking, i.e., allows the player to pass through it (and presumably suffering damage). This is good for modeling a fire for example. This is configured with ```nonBlocking=True``` (see [test-level](adventure_pkg/levels/test-level.py) for an example)
 1. For Obstructors which can drop items upon resolution, call `setItem`, e.g. `wolf.setItem('poison')`
 1. Add items (string values) to each relevant location object, e.g. `room23.addItem('black-key')`
 1. Connect the locations
@@ -109,5 +110,5 @@ Level: test-level : Pass=True
 # Feature and Task Backlog
 - Add automated unit tests for game classes
 - Add more source-level documentation
-- De-couple concept of blocking and resolvable obstructions. For example, allow a "fire" which you can pass through with damage to be put out with "water"
+- ~~De-couple concept of blocking and resolvable obstructions. For example, allow a "fire" which you can pass through with damage to be put out with "water"~~ Completed on 12/31/2020
 - Add a level chaining feature, i.e., instead of ending at the “exit room”, load a next-level (if specified). This could be used to implement multiple floors (upstairs, downstairs etc)
