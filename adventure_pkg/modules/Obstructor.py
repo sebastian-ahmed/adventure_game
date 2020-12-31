@@ -2,7 +2,8 @@ class Obstructor():
     '''
         Connections between locations can be obstructed by a variety of objects such as doors, trap or enemies
         Non-resolvable obstructions are supported by leaving resolutionItem undefined or setting to None
-        Applications for non-resolvable items are obstacles such as fire etc
+        Applications for non-resolvable items are obstacles such as fire which can damage the player but
+        do not obstruct passage
 
     '''
     def __init__(
