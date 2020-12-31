@@ -4,7 +4,8 @@ class Player():
     '''
         The Player class is intended to be a single instance object as the player of
         the game. The player has an inventory which can hold items. Items can move between
-        the Player object and a Location object
+        the Player object and a Location object. The Player also has a health of 100 points
+        which can be increased or reduced.
     '''
 
     def __init__(self,name):
@@ -19,10 +20,10 @@ class Player():
         self._invMaxCount = 4
         self._health = 100
 
-    def emptySlots(self):
+    def hasEmptySlots(self)->bool:
         return (self._invCount != self._invMaxCount)
 
-    def takeItem(self,item):
+    def takeItem(self,item)->bool:
         if (self._invCount == self._invMaxCount):
             print(f"Cannot add any more items, max of {self._invMaxCount} items reached")
             return False
@@ -73,10 +74,10 @@ class Player():
     def printHealth(self):
         print(f"{self._name}'s health is {self.getHealth()}/100 points")
 
-    def getHealth(self):
+    def getHealth(self)->int:
         return self._health
     
-    def isDead(self):
+    def isDead(self)->bool:
         return (self._health == 0)
     
     def reduceHealth(self,amount):
