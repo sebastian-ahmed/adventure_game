@@ -52,6 +52,7 @@ def helpMsg():
     print("use <item> (Use an item directly such as food)")
     print("save (saves current game to saved-game)")
     print("load (loads saved game from saved-game)")
+    print("history (prints command history)")
     print("h|help (print this message)")
     print("q|quit|exit (exits the game)\n")
 
@@ -86,6 +87,14 @@ class InputManager(object):
         '''
         self.dump()
 
+    @property
+    def log(self)->list:
+        return self._log
+
+    @log.setter
+    def log(self,arg:list):
+        self._log=arg
+
     matchDict = {
         'quit':       r'^[qQ]uit$|^[qQ]$|^[eE]xit$',
         'help':       r'^[hH]elp$|^[hH]$|$',
@@ -100,7 +109,8 @@ class InputManager(object):
         'take':       r'^(?:[tT]ake|[gG]et)\s+(?:the\s+)*([a-zA-Z0-9\-_]+)',
         'drop':       r'^[dD]rop\s+(?:the\s+)*([a-zA-Z0-9\-_]+)',
         'save':       r'^[sS]ave',
-        'load':       r'^[lL]oad'
+        'load':       r'^[lL]oad',
+        'history':    r'^[hH]istory'
     }
 
     def procUserInput (self,inString)->list:
@@ -120,12 +130,16 @@ class InputManager(object):
             # Support logging for non-scripted mode only
             user_input = input(inputStr)
             if logged==True:
-                if self.procUserInput(user_input)[0] in ['dump','exit','save','invalid']:
+                if self.procUserInput(user_input)[0] in ['dump','quit','save','load','history','invalid']:
                     pass
                 else:
                     self._log.append(user_input)
             return user_input
 
+    def printLog(self):
+        print("Command history:")
+        [print(x) for x in self._log]
+    
     def dump(self):
         log_file = 'input-log.json'
         print(f"Dumping out player history to {log_file}")
@@ -145,7 +159,7 @@ def game_loop(inputManager,guiEnable=True,scriptedMode:bool=False,scriptObj=None
     if Adventure.checkSave() and not scriptedMode:
         userInputStr = inputManager.getInput("\nA saved game was found, would you like to load it? (default=no):",logged=False)
     if userInputStr in ['y','Y','yes','Yes','YES']:
-        adv = Adventure.load()
+        adv,inputManager.log = Adventure.load()
         adv.setFlags(['waitForEnter','moved'])
     else:
         iname = inputManager.getInput("Please enter your name:",logged=False)
@@ -260,17 +274,20 @@ def game_loop(inputManager,guiEnable=True,scriptedMode:bool=False,scriptObj=None
         elif command == 'dump':
             inputManager.dump()
         elif command == 'save':
-            adv.save()
+            adv.save(auxObject=inputManager.log)
         elif command == 'load':
             if not Adventure.checkSave():
-                print(f"Game save file '{Adventure.fname}' found")
+                print(f"Game save file '{Adventure.fname}' not found")
             else:
-                adv = Adventure.load()
+                adv,inputManager.log = Adventure.load()
                 adv.setFlags(['waitForEnter','moved'])
+            continue
+        elif command == 'history':
+            inputManager.printLog()
             continue
         else:
             print("I did not understand the action, type 'help' for list of commands")
-            pass
+            continue
 
     if scriptedMode:
         return not adv.player.isDead()

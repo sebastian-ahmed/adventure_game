@@ -54,17 +54,26 @@ class Adventure(object):
     def player(self,player:Player):
         self._player = player
 
-    def save(self):
+    def save(self,auxObject=None):
+        '''
+        Besides saving this object, this method allows adding an arbitraty object to form
+        a tuple consisting of self and and arbitrary object
+        '''
         print("Saving game to save-file")
         with open(Adventure.fname,'wb') as f:
-            pickle.dump(self,f)
+            pickle.dump((self,auxObject),f)
 
     @staticmethod
     def checkSave()->bool:
         return path.exists(Adventure.fname)
 
     @staticmethod
-    def load():
+    def load()->list:
+        '''
+        Since the save method may have included an auxillary object, this method can 
+        be assumed to return a tuple consisting of an Adventure object and a secondary
+        object. The tuple is thus (Adventure,x) where x can be any object or None type
+        '''
         print("Loading game from save-file")
         with open(Adventure.fname,'rb') as f:
             return pickle.load(f)
@@ -130,7 +139,7 @@ class Adventure(object):
         if self._player.dropItem(item):
             self.level.cur_loc.addItem(item)
 
-    def useItemOnSelf(self,item):
+    def useItemOnSelf(self,item)->bool:
         if not self._player.hasItem(item):
             print(f"You do not have a '{item}'")
             return False
@@ -166,7 +175,7 @@ class Adventure(object):
         if flagName in self._flags:
             return True
         else:
-            raise GameError(f"{__name__} : trying to access undefined flagName")
+            raise GameError(f"{__name__} : trying to access undefined flagName {flagName}")
             
     def setFlag(self,flagName):
         if self.checkFlag(flagName):
@@ -205,5 +214,4 @@ class Adventure(object):
             Uses probabilities to determine how much health
             damage should occur to Player
         '''
-        #return random.choices([True,False],[0.2,0.8])[0]
         return random.randint(20,50)
