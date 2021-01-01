@@ -49,7 +49,7 @@ class PlayScript(object):
     that the play script results in ending a level
     '''
     def __init__(self,script:list=[],config:GameConfig=None):
-        if GameConfig:# Pre-pend config strings into script
+        if config:# Pre-pend config strings into script
             self._script = config.strList + script
         else:
             self._script = script
