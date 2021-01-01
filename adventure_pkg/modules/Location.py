@@ -112,8 +112,8 @@ class Location():
     def isEndLocation(self):
         return self._endLocation
 
-    def setDescription (self,Description):
-        self._description=Description
+    def setDescription (self,description):
+        self._description=description
         self._isDescribed = True
 
     def printDescription(self):
