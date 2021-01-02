@@ -5,6 +5,14 @@
 
 The game is written in Python and should work with version 3.6 or higher
 
+## Main Features
+- Basic graphical rendering of current room, player inventory, health, room items and obstacles
+- Simple object-based API level-programming interface de-coupled from main game code
+- Ability to save and load a game at any point (including command history)
+- Scripted/automated playthrough capability for game and level regression testing
+- Player command history and logging (can be used to generate scripted playthroughs)
+- Tested on Windows 10 and Mac OS X, and 11 (Big Sur)
+
 # Quick Start
 - Make sure you have the Python interpreter installed on your system. See [here](https://www.python.org/downloads/)
 - Make sure to have Git installed on your system (on Linux and Mac these will be included). For windows see [here](https://git-scm.com/download/win)
@@ -106,9 +114,3 @@ Level: test-level : Pass=True
 - The script replay mode disables the GUI (for speed)
 - If a player dies as a result of a script playthrough, the test is reported as a fail.
 - If the script fails to provides a sequence of actions to complete the level, a `StopIteration` exception is raised by the script sequence object. This is by design.
-
-# Feature and Task Backlog
-- Add automated unit tests for game classes
-- Add more source-level documentation
-- ~~De-couple concept of blocking and resolvable obstructions. For example, allow a "fire" which you can pass through with damage to be put out with "water"~~ Completed on 12/31/2020
-- Add a level chaining feature, i.e., instead of ending at the “exit room”, load a next-level (if specified). This could be used to implement multiple floors (upstairs, downstairs etc)
