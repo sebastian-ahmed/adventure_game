@@ -5,6 +5,8 @@
 
 The game is written in Python and should work with version 3.6 or higher
 
+If you are interested in the background of this project and some details on the game design, please see [my blog post](https://sebastian-ahmed.medium.com/an-adventure-game-for-teaching-programming-66804845041c).
+
 ## Main Features
 - Basic graphical rendering of current room, player inventory, health, room items and obstacles
 - Simple object-based API level-programming interface de-coupled from main game code
